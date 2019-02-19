@@ -20,19 +20,16 @@ server.use(helmet());
 
 // endpoints here
 
-server.post('api/zoos', async (req, res) => {
+server.post('/api/zoos', async (req, res) => {
   try{
-    const [id] = await db('zoos')
-    .insert(req.body);
-    const zoo = await db('zoos')
-    .where({id})
-    .first();
-    res.status(201).json(zoo);
-      // if (req.body == '' || req.body == null) {
-      //   res.status(404).json({message: 'Please fill in the zoo name'});
-      // } else {
-      //   res.status(201).json(zoo);
-      // }
+    if (req.body.name == '' || req.body.name == null) {
+      res.status(406).json({message: 'Please fill in the zoo name'});
+    } else {
+        const [id] = await db('zoos')
+        .insert(req.body);
+   
+        res.status(201).json(id);
+      }
     
   } catch (error) {
       res.status(500).json({error: 'There was an error adding a zoo'});
@@ -65,13 +62,13 @@ server.get('/api/zoos/:id', async (req, res) => {
   }
 });
 
-server.put('api/zoos/:id', async (req, res) => {
+server.put('/api/zoos/:id', async (req, res) => {
   try {
-    const count = await db('zoos')
+    const changes = await db('zoos')
     .where({id: req.params.id})
     .update(req.body);
 
-    if (count > 0) {
+    if (changes > 0) {
       const zoo = await db('zoos')
       .where({id: req.params.id})
       .first();
@@ -80,7 +77,7 @@ server.put('api/zoos/:id', async (req, res) => {
       res.status(404).json({message: 'That zoo is not in our database'});
     }
   } catch (error) {
-      res.status(500).json({error: 'Something has gone terribly wrong'});
+      res.status(500).json({error});
   }
 });
 
